@@ -39,10 +39,10 @@ export function TransactionForm() {
   const queryClient = useQueryClient()
 
   const form = useForm<TransactionInput>({
-    resolver: zodResolver(transactionSchema),
+    resolver: zodResolver(transactionSchema) as any,
     defaultValues: {
       type: "expense",
-      amount: "" as unknown as number, // String vazia para o React entender que é controlado
+      amount: "" as any, // String vazia para o React entender que é controlado
       description: "",
       transaction_date: new Date().toISOString().split('T')[0],
     },

@@ -2,12 +2,10 @@ import { supabase } from '@/lib/supabase'
 import { z } from 'zod'
 
 export const transactionSchema = z.object({
-  type: z.enum(['income', 'expense', 'investment'], {
-    required_error: "O tipo de transação é obrigatório."
-  }),
+  type: z.enum(['income', 'expense', 'investment']),
   amount: z.coerce.number().positive('O valor deve ser maior que zero.'),
   description: z.string().min(3, 'A descrição deve ter pelo menos 3 caracteres.'),
-  transaction_date: z.string().nonempty('A data é obrigatória.'), 
+  transaction_date: z.string().min(1, 'A data é obrigatória.'), 
 })
 
 export type TransactionInput = z.infer<typeof transactionSchema>
