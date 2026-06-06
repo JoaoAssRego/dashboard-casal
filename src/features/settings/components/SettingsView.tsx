@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query"
 import { getCategories, type Category } from "@/features/categories/api/categories"
 import { useAuthStore } from "@/features/auth/store/useAuthStore"
 import { CategoryFormDrawer } from "./CategoryFormDrawer"
-import { LogOut, Plus, Settings2, User } from "lucide-react"
+import { Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 export function SettingsView() {

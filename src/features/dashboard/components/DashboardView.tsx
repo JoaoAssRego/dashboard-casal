@@ -2,23 +2,17 @@ import { useAuthStore } from "@/features/auth/store/useAuthStore"
 import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { getTransactions } from "@/features/transactions/api/transactions"
-import { getCategories } from "@/features/categories/api/categories"
-import { Loader2, User } from "lucide-react"
+import { User } from "lucide-react"
 import { SummaryCards } from "./SummaryCards"
 import { ProfileDrawer } from "./ProfileDrawer"
 
 export function DashboardView() {
   const { user } = useAuthStore()
-
-  // O React Query busca os dados da API de transações automaticamente.
-  const { data: transactions, isLoading } = useQuery({
-    queryKey: ['transactions'],
-    queryFn: getTransactions
-  })
-
-  const { data: categories } = useQuery({
-    queryKey: ['categories'],
-    queryFn: getCategories
+  
+  // Busca e soma transações
+  const { data: transactions, isLoading: loadingTx } = useQuery({ 
+    queryKey: ['transactions'], 
+    queryFn: getTransactions 
   })
 
   // Cálculos em tempo real para os cartões
@@ -50,7 +44,7 @@ export function DashboardView() {
       </div>
 
       {/* Cartões de Resumo (Apenas Saldo Clicável) */}
-      <SummaryCards balance={balance} income={income} expense={expense} isLoading={isLoading} minimal={true} />
+      <SummaryCards balance={balance} income={income} expense={expense} isLoading={loadingTx} minimal={true} />
     </div>
   )
 }

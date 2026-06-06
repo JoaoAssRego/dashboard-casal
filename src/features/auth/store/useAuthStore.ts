@@ -7,6 +7,7 @@ interface AuthState {
   session: Session | null
   isInitialized: boolean
   initialize: () => void
+  signOut: () => Promise<void>
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -24,5 +25,10 @@ export const useAuthStore = create<AuthState>((set) => ({
     supabase.auth.onAuthStateChange((_event, session) => {
       set({ session, user: session?.user ?? null })
     })
+  },
+
+  signOut: async () => {
+    await supabase.auth.signOut()
+    set({ session: null, user: null })
   }
 }))
