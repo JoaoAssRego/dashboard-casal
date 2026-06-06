@@ -4,8 +4,6 @@ import { getTransactions, deleteTransaction } from "../api/transactions"
 import { Loader2, Trash2 } from "lucide-react"
 import { TransactionEditDrawer } from "./TransactionEditDrawer"
 import type { Transaction } from "../api/transactions"
-import { Button } from "@/components/ui/button"
-
 export function TransactionList() {
   const queryClient = useQueryClient()
   const [editingTx, setEditingTx] = useState<Transaction | null>(null)

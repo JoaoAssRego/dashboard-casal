@@ -112,7 +112,6 @@ export function TransactionsView() {
           filteredTransactions.map((tx) => {
             const isExpense = tx.type === 'expense'
             const isIncome = tx.type === 'income'
-            const isInvestment = tx.type === 'investment'
 
             const category = categories?.find(c => c.id === tx.category_id)
 
