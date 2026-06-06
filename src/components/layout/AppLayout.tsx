@@ -1,5 +1,6 @@
 import { Outlet, Link, useLocation } from "react-router-dom"
 import { Home, Target, ArrowRightLeft, Menu } from "lucide-react"
+import { InviteAlert } from "@/features/family/components/InviteAlert"
 import { cn } from "@/lib/utils"
 
 export function AppLayout() {
@@ -13,7 +14,10 @@ export function AppLayout() {
   ]
 
   return (
-    <div className="flex flex-col h-screen bg-background text-foreground pb-[env(safe-area-inset-bottom)]">
+    <div className="flex flex-col h-screen bg-background text-foreground pb-[env(safe-area-inset-bottom)] relative">
+      {/* Alerta Global de Convite */}
+      <InviteAlert />
+
       {/* Área Principal com Scroll - A tela renderiza aqui dentro */}
       <main className="flex-1 overflow-y-auto overflow-x-hidden p-4 pb-24">
         <Outlet />

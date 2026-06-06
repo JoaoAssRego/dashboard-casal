@@ -2,7 +2,8 @@ import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { getCategories, type Category } from "@/features/categories/api/categories"
 import { CategoryFormDrawer } from "./CategoryFormDrawer"
-import { Plus } from "lucide-react"
+import { FamilyDrawer } from "@/features/family/components/FamilyDrawer"
+import { Plus, Users } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 export function SettingsView() {
@@ -10,6 +11,7 @@ export function SettingsView() {
   
   const [editingCat, setEditingCat] = useState<Category | null>(null)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
+  const [isFamilyOpen, setIsFamilyOpen] = useState(false)
 
   function handleAdd() {
     setEditingCat(null)
@@ -28,12 +30,32 @@ export function SettingsView() {
         open={isDrawerOpen} 
         onOpenChange={setIsDrawerOpen} 
       />
+      <FamilyDrawer 
+        open={isFamilyOpen} 
+        onOpenChange={setIsFamilyOpen} 
+      />
 
       <div className="pt-2">
         <h2 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
           Menu Principal
         </h2>
         <p className="text-slate-400 text-sm">Todos os serviços e configurações</p>
+      </div>
+
+      {/* Atalhos Principais */}
+      <div className="bg-slate-900/50 border border-slate-800 rounded-2xl overflow-hidden mt-4">
+        <div 
+          onClick={() => setIsFamilyOpen(true)}
+          className="flex items-center gap-4 p-4 cursor-pointer hover:bg-slate-800/50 transition-colors"
+        >
+          <div className="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center shrink-0">
+            <Users className="h-5 w-5 text-purple-400" />
+          </div>
+          <div className="flex-1">
+            <h3 className="text-white font-medium text-sm">Minha Família</h3>
+            <p className="text-xs text-slate-400">Convide pessoas para a sua conta conjunta</p>
+          </div>
+        </div>
       </div>
 
       {/* Seção de Categorias */}
