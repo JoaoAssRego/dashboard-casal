@@ -50,7 +50,10 @@ export function LoginForm() {
         await loginWithEmail(values)
       }
     } catch (error: any) {
-      setServerError(error.message || "Ocorreu um erro de conexão.")
+      let errorMsg = error.message || "Ocorreu um erro de conexão."
+      if (errorMsg.includes("User already registered")) errorMsg = "Este e-mail já está cadastrado no sistema."
+      if (errorMsg.includes("Invalid login credentials")) errorMsg = "E-mail ou senha incorretos."
+      setServerError(errorMsg)
     } finally {
       setIsLoading(false)
     }

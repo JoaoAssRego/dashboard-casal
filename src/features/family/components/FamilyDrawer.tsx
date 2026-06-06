@@ -25,7 +25,7 @@ export function FamilyDrawer({ open, onOpenChange }: { open: boolean, onOpenChan
     enabled: open
   })
 
-  const { data: pending, isLoading: loadingPending } = useQuery({ 
+  const { data: pending } = useQuery({ 
     queryKey: ['family_pending'], 
     queryFn: getHouseholdPendingInvites,
     enabled: open
