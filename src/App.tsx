@@ -4,8 +4,10 @@ import { useAuthStore } from "@/features/auth/store/useAuthStore"
 import { LoginForm } from "@/features/auth/components/LoginForm"
 import { AppLayout } from "@/components/layout/AppLayout"
 import { DashboardView } from "@/features/dashboard/components/DashboardView"
+import { BalanceDetailsView } from "@/features/dashboard/components/BalanceDetailsView"
 import { GoalsView } from "@/features/goals/components/GoalsView"
 import { TransactionsView } from "@/features/transactions/components/TransactionsView"
+import { SettingsView } from "@/features/settings/components/SettingsView"
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, isInitialized } = useAuthStore()
@@ -25,14 +27,6 @@ function LoginRoute() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <LoginForm />
-    </div>
-  )
-}
-
-function Placeholder({ title }: { title: string }) {
-  return (
-    <div className="flex h-full min-h-[50vh] items-center justify-center">
-      <h1 className="text-xl font-medium text-muted-foreground">{title} em construção</h1>
     </div>
   )
 }
@@ -60,9 +54,10 @@ function App() {
         >
           {/* Telas que serão renderizadas no miolo do aplicativo */}
           <Route index element={<DashboardView />} />
+          <Route path="balance" element={<BalanceDetailsView />} />
           <Route path="transactions" element={<TransactionsView />} />
           <Route path="goals" element={<GoalsView />} />
-          <Route path="settings" element={<Placeholder title="Ajustes" />} />
+          <Route path="settings" element={<SettingsView />} />
         </Route>
       </Routes>
     </BrowserRouter>

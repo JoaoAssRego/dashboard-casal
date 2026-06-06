@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation } from "react-router-dom"
-import { Home, Target, ArrowRightLeft, Settings } from "lucide-react"
+import { Home, Target, ArrowRightLeft, Menu } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 export function AppLayout() {
@@ -9,7 +9,7 @@ export function AppLayout() {
     { icon: Home, label: "Início", path: "/" },
     { icon: ArrowRightLeft, label: "Extrato", path: "/transactions" },
     { icon: Target, label: "Metas", path: "/goals" },
-    { icon: Settings, label: "Ajustes", path: "/settings" },
+    { icon: Menu, label: "Todos", path: "/settings" },
   ]
 
   return (

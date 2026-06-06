@@ -20,7 +20,7 @@ export interface Transaction extends TransactionInput {
 }
 
 // Lógica inteligente: Pega a conta conjunta, e se for o primeiro acesso da vida, cria uma na hora!
-async function getHouseholdId() {
+export async function getHouseholdId() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error("Sessão expirada. Faça login novamente.")
 

@@ -1,10 +1,11 @@
 import { useAuthStore } from "@/features/auth/store/useAuthStore"
+import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { getTransactions } from "@/features/transactions/api/transactions"
 import { getCategories } from "@/features/categories/api/categories"
+import { Loader2, User } from "lucide-react"
 import { SummaryCards } from "./SummaryCards"
-import { ExpenseChart } from "./ExpenseChart"
-import { TransactionList } from "@/features/transactions/components/TransactionList"
+import { ProfileDrawer } from "./ProfileDrawer"
 
 export function DashboardView() {
   const { user } = useAuthStore()
@@ -21,36 +22,35 @@ export function DashboardView() {
   })
 
   // Cálculos em tempo real para os cartões
-  const income = transactions?.filter(t => t.type === 'income').reduce((acc, curr) => acc + Number(curr.amount), 0) || 0
-  const expense = transactions?.filter(t => t.type === 'expense').reduce((acc, curr) => acc + Number(curr.amount), 0) || 0
+  const income = transactions?.filter(t => t.type === 'income').reduce((acc, t) => acc + Number(t.amount), 0) || 0
+  const expense = transactions?.filter(t => t.type === 'expense').reduce((acc, t) => acc + Number(t.amount), 0) || 0
   
   // Por enquanto, o Saldo do Casal considera Receitas - Despesas. (Futuramente incluiremos Saldo Inicial / Aportes)
   const balance = income - expense
 
+  const [isProfileOpen, setIsProfileOpen] = useState(false)
+
   return (
-    <div className="space-y-6 animate-in fade-in duration-500 relative">
-      <div className="flex items-center justify-between pt-2">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight text-white">Resumo Geral</h2>
-          <p className="text-slate-400 text-sm">
-            Bem-vindo de volta, <span className="text-purple-400 font-medium">{user?.user_metadata?.full_name || user?.email?.split('@')[0]}</span>
-          </p>
+    <div className="space-y-6 animate-in fade-in duration-500 pb-20">
+      <ProfileDrawer open={isProfileOpen} onOpenChange={setIsProfileOpen} />
+
+      {/* Header Estilo Banco Inter */}
+      <div className="pt-2 flex items-center justify-between">
+        <div 
+          className="flex items-center gap-3 cursor-pointer group"
+          onClick={() => setIsProfileOpen(true)}
+        >
+          <div className="w-10 h-10 bg-slate-800 rounded-full flex items-center justify-center border border-slate-700 shadow-sm group-hover:ring-2 ring-purple-500/50 transition-all">
+            <User className="h-5 w-5 text-slate-300" />
+          </div>
+          <div>
+            <p className="text-white font-medium text-sm capitalize">Olá, {user?.user_metadata?.full_name || user?.email?.split('@')[0]}</p>
+          </div>
         </div>
       </div>
 
-      <SummaryCards 
-        balance={balance} 
-        income={income} 
-        expense={expense} 
-        isLoading={isLoading} 
-      />
-
-      <ExpenseChart transactions={transactions || []} categories={categories || []} />
-
-      <div className="pt-2">
-        <h3 className="text-base font-semibold text-slate-300 mb-3">Últimos Lançamentos</h3>
-        <TransactionList />
-      </div>
+      {/* Cartões de Resumo (Apenas Saldo Clicável) */}
+      <SummaryCards balance={balance} income={income} expense={expense} isLoading={isLoading} minimal={true} />
     </div>
   )
 }
