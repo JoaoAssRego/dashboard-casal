@@ -1,10 +1,10 @@
-import { useState } from "react"
+import { useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query"
 import { getGoals } from "@/features/goals/api/goals"
 import { getCategories } from "@/features/categories/api/categories"
-import { Loader2, Plus } from "lucide-react"
+import { Loader2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -33,17 +33,22 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
-import { transactionSchema, type TransactionInput, createTransaction } from "../api/transactions"
+import { transactionSchema, type TransactionInput, type Transaction, updateTransaction } from "../api/transactions"
 
-export function TransactionForm() {
-  const [open, setOpen] = useState(false)
+interface TransactionEditDrawerProps {
+  transaction: Transaction | null
+  open: boolean
+  onOpenChange: (open: boolean) => void
+}
+
+export function TransactionEditDrawer({ transaction, open, onOpenChange }: TransactionEditDrawerProps) {
   const queryClient = useQueryClient()
 
   const form = useForm<TransactionInput>({
     resolver: zodResolver(transactionSchema) as any,
     defaultValues: {
       type: "expense",
-      amount: "" as any, // String vazia para o React entender que é controlado
+      amount: "" as any,
       description: "",
       transaction_date: new Date().toISOString().split('T')[0],
       goal_id: null,
@@ -51,58 +56,53 @@ export function TransactionForm() {
     },
   })
 
-  // Assistir o tipo para mostrar o campo de meta
+  // Preenche o formulário quando a transação selecionada mudar
+  useEffect(() => {
+    if (transaction) {
+      form.reset({
+        type: transaction.type,
+        amount: Number(transaction.amount) as any,
+        description: transaction.description,
+        transaction_date: new Date(transaction.transaction_date).toISOString().split('T')[0],
+        goal_id: transaction.goal_id,
+        category_id: transaction.category_id,
+      })
+    }
+  }, [transaction, form])
+
   const txType = form.watch("type")
   const { data: goals } = useQuery({ queryKey: ['goals'], queryFn: getGoals })
   const { data: categories } = useQuery({ queryKey: ['categories'], queryFn: getCategories })
 
   const mutation = useMutation({
-    mutationFn: createTransaction,
+    mutationFn: updateTransaction,
     onSuccess: () => {
-      // Invalida o cache e faz a Home se re-desenhar na mesma hora
       queryClient.invalidateQueries({ queryKey: ['transactions'] })
-      setOpen(false)
-      form.reset()
+      queryClient.invalidateQueries({ queryKey: ['goals'] }) // Pode afetar metas se for investimento
+      onOpenChange(false)
     },
     onError: (error: any) => {
-      alert("Erro ao salvar: " + error.message)
+      alert("Erro ao editar: " + error.message)
     }
   })
 
   function onSubmit(values: TransactionInput) {
-    mutation.mutate(values)
-  }
-
-  function handleOpen() {
-    if (document.activeElement instanceof HTMLElement) {
-      document.activeElement.blur()
-    }
-    setOpen(true)
+    if (!transaction) return
+    mutation.mutate({ id: transaction.id, input: values })
   }
 
   return (
-    <>
-      {/* Botão Flutuante (FAB) Estilo Nativo posicionado acima da BottomBar */}
-      <Button 
-        onClick={handleOpen}
-        size="lg" 
-        className="fixed bottom-24 right-4 h-14 w-14 rounded-full shadow-xl shadow-primary/20 z-40 bg-purple-600 hover:bg-purple-500 border-none text-white"
-      >
-        <Plus className="h-6 w-6 stroke-[3px]" />
-      </Button>
-
-      <Drawer open={open} onOpenChange={setOpen}>
-      {/* O Conteúdo da Gaveta em Dark Premium */}
+    <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent className="bg-slate-950 border-t border-purple-500/20">
         <div className="mx-auto w-full max-w-sm">
           <DrawerHeader>
-            <DrawerTitle className="text-xl font-bold text-white">Novo Lançamento</DrawerTitle>
-            <DrawerDescription className="text-purple-200/50">Registre uma despesa, receita ou aporte.</DrawerDescription>
+            <DrawerTitle className="text-xl font-bold text-white">Editar Lançamento</DrawerTitle>
+            <DrawerDescription className="text-purple-200/50">Veja ou edite os detalhes desta movimentação.</DrawerDescription>
           </DrawerHeader>
           
           <div className="p-4 pb-0">
             <Form {...form}>
-              <form id="transaction-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <form id="transaction-edit-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 
                 <FormField
                   control={form.control}
@@ -110,7 +110,7 @@ export function TransactionForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-slate-300">Tipo de Movimentação</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
                         <FormControl>
                           <SelectTrigger className="bg-slate-900 border-slate-800 text-white">
                             <SelectValue placeholder="Selecione o tipo" />
@@ -134,7 +134,10 @@ export function TransactionForm() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-slate-300">Categoria</FormLabel>
-                        <Select onValueChange={(val) => field.onChange(val === 'none' ? null : val)} defaultValue={field.value || undefined}>
+                        <Select 
+                          onValueChange={(val) => field.onChange(val === 'none' ? null : val)} 
+                          value={field.value || 'none'}
+                        >
                           <FormControl>
                             <SelectTrigger className="bg-slate-900 border-slate-800 text-white">
                               <SelectValue placeholder="Selecione a categoria" />
@@ -165,7 +168,10 @@ export function TransactionForm() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-slate-300">Para qual Meta?</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value || undefined}>
+                        <Select 
+                          onValueChange={field.onChange} 
+                          value={field.value || undefined}
+                        >
                           <FormControl>
                             <SelectTrigger className="bg-slate-900 border-slate-800 text-white">
                               <SelectValue placeholder="Selecione a meta" />
@@ -235,12 +241,12 @@ export function TransactionForm() {
           <DrawerFooter className="pt-6">
             <Button 
               type="submit" 
-              form="transaction-form" 
+              form="transaction-edit-form" 
               disabled={mutation.isPending}
               className="rounded-full bg-purple-600 hover:bg-purple-500 text-white font-semibold"
             >
               {mutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Lançar
+              Salvar Edição
             </Button>
             <DrawerClose asChild>
               <Button variant="ghost" className="rounded-full text-slate-400 hover:text-white hover:bg-slate-800">Cancelar</Button>
@@ -248,7 +254,6 @@ export function TransactionForm() {
           </DrawerFooter>
         </div>
       </DrawerContent>
-      </Drawer>
-    </>
+    </Drawer>
   )
 }

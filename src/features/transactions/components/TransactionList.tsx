@@ -1,10 +1,14 @@
+import { useState } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { getTransactions, deleteTransaction } from "../api/transactions"
 import { Loader2, Trash2 } from "lucide-react"
+import { TransactionEditDrawer } from "./TransactionEditDrawer"
+import type { Transaction } from "../api/transactions"
 import { Button } from "@/components/ui/button"
 
 export function TransactionList() {
   const queryClient = useQueryClient()
+  const [editingTx, setEditingTx] = useState<Transaction | null>(null)
 
   const { data: transactions, isLoading, error } = useQuery({
     queryKey: ['transactions'],
@@ -41,8 +45,13 @@ export function TransactionList() {
 
   return (
     <div className="space-y-3 pb-8">
+      <TransactionEditDrawer transaction={editingTx} open={!!editingTx} onOpenChange={(o) => !o && setEditingTx(null)} />
       {transactions.map((tx) => (
-        <div key={tx.id} className="flex items-center justify-between p-4 rounded-xl bg-slate-900/80 border border-slate-800 shadow-sm backdrop-blur-md">
+        <div 
+          key={tx.id} 
+          className="flex items-center justify-between p-4 rounded-xl bg-slate-900/80 border border-slate-800 shadow-sm backdrop-blur-md cursor-pointer hover:bg-slate-800/80 transition-colors"
+          onClick={() => setEditingTx(tx)}
+        >
           <div className="flex flex-col flex-1">
             <span className="font-medium text-white text-sm">{tx.description}</span>
             <span className="text-[10px] text-slate-400 mt-0.5">
@@ -55,19 +64,17 @@ export function TransactionList() {
               {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(tx.amount)}
             </div>
             
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="h-8 w-8 text-slate-600 hover:text-pink-500 hover:bg-pink-500/10 rounded-full"
-              disabled={deleteMutation.isPending}
-              onClick={() => {
+            <button 
+              onClick={(e) => {
+                e.stopPropagation()
                 if (window.confirm("Deseja apagar este lançamento?")) {
                   deleteMutation.mutate(tx.id)
                 }
               }}
+              className="p-2 text-slate-600 hover:text-red-400 hover:bg-red-400/10 rounded-full transition-colors"
             >
               <Trash2 className="h-4 w-4" />
-            </Button>
+            </button>
           </div>
         </div>
       ))}

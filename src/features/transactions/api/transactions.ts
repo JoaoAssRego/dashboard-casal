@@ -7,6 +7,7 @@ export const transactionSchema = z.object({
   description: z.string().min(3, 'A descrição deve ter pelo menos 3 caracteres.'),
   transaction_date: z.string().min(1, 'A data é obrigatória.'), 
   goal_id: z.string().uuid('Meta inválida').optional().nullable(),
+  category_id: z.string().uuid('Categoria inválida').optional().nullable(),
 })
 
 export type TransactionInput = z.infer<typeof transactionSchema>
@@ -31,12 +32,12 @@ async function getHouseholdId() {
 
   if (profile?.household_id) return profile.household_id
 
-  // Geração automática do Household (Conta Conjunta) via Função Segura no Banco
+  // Geração automática do Household (Conta) via Função Segura no Banco
   const { data: newHouseholdId, error: hError } = await supabase.rpc('create_household_for_user', {
     household_name: 'Finanças do Casal'
   })
     
-  if (hError || !newHouseholdId) throw new Error("Erro ao gerar sua conta conjunta: " + hError?.message)
+  if (hError || !newHouseholdId) throw new Error("Erro ao gerar sua conta: " + hError?.message)
 
   return newHouseholdId
 }
@@ -77,4 +78,35 @@ export async function deleteTransaction(id: string) {
     .eq('id', id)
   
   if (error) throw new Error(error.message)
+}
+
+export async function updateTransaction({ id, input }: { id: string, input: TransactionInput }) {
+  const { data, error } = await supabase
+    .from('transactions')
+    .update(input)
+    .eq('id', id)
+    .select()
+    .single()
+
+  if (error) throw new Error(error.message)
+  return data
+}
+
+export async function createTransactionsBatch(transactions: TransactionInput[]) {
+  const household_id = await getHouseholdId()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  const insertData = transactions.map(t => ({
+    household_id,
+    created_by: user?.id,
+    ...t
+  }))
+
+  const { data, error } = await supabase
+    .from('transactions')
+    .insert(insertData)
+    .select()
+
+  if (error) throw new Error(error.message)
+  return data
 }

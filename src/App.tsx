@@ -5,6 +5,7 @@ import { LoginForm } from "@/features/auth/components/LoginForm"
 import { AppLayout } from "@/components/layout/AppLayout"
 import { DashboardView } from "@/features/dashboard/components/DashboardView"
 import { GoalsView } from "@/features/goals/components/GoalsView"
+import { TransactionsView } from "@/features/transactions/components/TransactionsView"
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, isInitialized } = useAuthStore()
@@ -59,7 +60,7 @@ function App() {
         >
           {/* Telas que serão renderizadas no miolo do aplicativo */}
           <Route index element={<DashboardView />} />
-          <Route path="transactions" element={<Placeholder title="Extrato" />} />
+          <Route path="transactions" element={<TransactionsView />} />
           <Route path="goals" element={<GoalsView />} />
           <Route path="settings" element={<Placeholder title="Ajustes" />} />
         </Route>

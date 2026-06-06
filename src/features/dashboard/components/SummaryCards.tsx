@@ -25,14 +25,14 @@ export function SummaryCards({ balance = 0, income = 0, expense = 0, isLoading =
       <Card className="border-purple-500/30 shadow-xl shadow-purple-500/10 bg-gradient-to-br from-indigo-950 via-purple-900/40 to-slate-950 overflow-hidden relative">
         <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none" />
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
-          <CardTitle className="text-sm font-medium text-purple-200">Saldo do Casal</CardTitle>
+          <CardTitle className="text-sm font-medium text-purple-200">Saldo</CardTitle>
           <Wallet className="h-5 w-5 text-purple-400" />
         </CardHeader>
         <CardContent className="relative z-10">
           <div className="text-3xl font-bold text-white tracking-tight">
             {displayValue(balance)}
           </div>
-          <p className="text-xs text-purple-300/70 mt-1">Disponível na conta conjunta</p>
+          <p className="text-xs text-purple-300/70 mt-1">Disponível em sua conta</p>
         </CardContent>
       </Card>
 
@@ -48,6 +48,7 @@ export function SummaryCards({ balance = 0, income = 0, expense = 0, isLoading =
             <div className="text-lg font-bold text-blue-100">
               {displayValue(income)}
             </div>
+            <p className="text-xs text-purple-300/70 mt-1">Receitas de sua Conta </p>
           </CardContent>
         </Card>
 

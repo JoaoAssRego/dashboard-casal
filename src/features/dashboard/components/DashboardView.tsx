@@ -1,9 +1,10 @@
 import { useAuthStore } from "@/features/auth/store/useAuthStore"
 import { useQuery } from "@tanstack/react-query"
 import { getTransactions } from "@/features/transactions/api/transactions"
+import { getCategories } from "@/features/categories/api/categories"
 import { SummaryCards } from "./SummaryCards"
+import { ExpenseChart } from "./ExpenseChart"
 import { TransactionList } from "@/features/transactions/components/TransactionList"
-import { TransactionForm } from "@/features/transactions/components/TransactionForm"
 
 export function DashboardView() {
   const { user } = useAuthStore()
@@ -12,6 +13,11 @@ export function DashboardView() {
   const { data: transactions, isLoading } = useQuery({
     queryKey: ['transactions'],
     queryFn: getTransactions
+  })
+
+  const { data: categories } = useQuery({
+    queryKey: ['categories'],
+    queryFn: getCategories
   })
 
   // Cálculos em tempo real para os cartões
@@ -39,13 +45,12 @@ export function DashboardView() {
         isLoading={isLoading} 
       />
 
+      <ExpenseChart transactions={transactions || []} categories={categories || []} />
+
       <div className="pt-2">
         <h3 className="text-base font-semibold text-slate-300 mb-3">Últimos Lançamentos</h3>
         <TransactionList />
       </div>
-
-      {/* Botão Flutuante (Gaveta) posicionado de forma fixa */}
-      <TransactionForm />
     </div>
   )
 }
