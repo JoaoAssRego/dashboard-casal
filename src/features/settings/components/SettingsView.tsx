@@ -1,13 +1,11 @@
 import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { getCategories, type Category } from "@/features/categories/api/categories"
-import { useAuthStore } from "@/features/auth/store/useAuthStore"
 import { CategoryFormDrawer } from "./CategoryFormDrawer"
 import { Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 export function SettingsView() {
-  const { user, signOut } = useAuthStore()
   const { data: categories, isLoading } = useQuery({ queryKey: ['categories'], queryFn: getCategories })
   
   const [editingCat, setEditingCat] = useState<Category | null>(null)
