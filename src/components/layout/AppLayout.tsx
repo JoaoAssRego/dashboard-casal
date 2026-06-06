@@ -1,6 +1,5 @@
-import { Outlet, Navigate, Link, useLocation } from "react-router-dom"
-import { useAuthStore } from "@/features/auth/store/useAuthStore"
-import { Home, LogOut, Target, ArrowRightLeft, Settings } from "lucide-react"
+import { Outlet, Link, useLocation } from "react-router-dom"
+import { Home, Target, ArrowRightLeft, Settings } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 export function AppLayout() {

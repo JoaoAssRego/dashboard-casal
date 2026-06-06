@@ -22,7 +22,6 @@ import {
   DrawerFooter,
   DrawerHeader,
   DrawerTitle,
-  DrawerTrigger,
 } from "@/components/ui/drawer"
 
 import { goalSchema, type GoalInput, createGoal } from "../api/goals"
