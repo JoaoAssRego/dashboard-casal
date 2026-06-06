@@ -110,7 +110,7 @@ export function LoginForm() {
             <p className="text-sm text-muted-foreground">
               {isSignUp
                 ? "Registre-se para iniciar a jornada financeira."
-                : "Entre para visualizar os números do casal."}
+                : "Entre para começar a sua jornada financeira"}
             </p>
           </div>
 
@@ -123,7 +123,7 @@ export function LoginForm() {
                   <FormItem>
                     <FormLabel>E-mail</FormLabel>
                     <FormControl>
-                      <Input placeholder="casal@email.com" {...field} />
+                      <Input placeholder="seu_email@email.com" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

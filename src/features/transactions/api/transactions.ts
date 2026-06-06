@@ -34,7 +34,7 @@ export async function getHouseholdId() {
 
   // Geração automática do Household (Conta) via Função Segura no Banco
   const { data: newHouseholdId, error: hError } = await supabase.rpc('create_household_for_user', {
-    household_name: 'Finanças do Casal'
+    household_name: 'Suas Finanças'
   })
     
   if (hError || !newHouseholdId) throw new Error("Erro ao gerar sua conta: " + hError?.message)

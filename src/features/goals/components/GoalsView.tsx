@@ -32,7 +32,7 @@ export function GoalsView() {
       <div className="flex items-center justify-between pt-2">
         <div>
           <h2 className="text-2xl font-bold tracking-tight text-white">Metas Financeiras</h2>
-          <p className="text-slate-400 text-sm">Acompanhe os sonhos do casal</p>
+          <p className="text-slate-400 text-sm">Acompanhe os seus sonhos</p>
         </div>
       </div>
 

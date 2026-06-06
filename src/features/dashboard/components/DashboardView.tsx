@@ -19,7 +19,7 @@ export function DashboardView() {
   const income = transactions?.filter(t => t.type === 'income').reduce((acc, t) => acc + Number(t.amount), 0) || 0
   const expense = transactions?.filter(t => t.type === 'expense').reduce((acc, t) => acc + Number(t.amount), 0) || 0
   
-  // Por enquanto, o Saldo do Casal considera Receitas - Despesas. (Futuramente incluiremos Saldo Inicial / Aportes)
+  // Por enquanto, o seu saldo considera Receitas - Despesas. (Futuramente incluiremos Saldo Inicial / Aportes)
   const balance = income - expense
 
   const [isProfileOpen, setIsProfileOpen] = useState(false)
