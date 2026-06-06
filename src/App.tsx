@@ -23,12 +23,8 @@ function LoginRoute() {
   
   if (!isInitialized) return <div className="min-h-screen flex items-center justify-center">Carregando...</div>
   if (user) return <Navigate to="/" replace />
-  
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <LoginForm />
-    </div>
-  )
+
+  return <LoginForm />
 }
 
 function App() {
