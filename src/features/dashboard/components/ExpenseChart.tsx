@@ -38,7 +38,7 @@ export function ExpenseChart({ transactions, categories }: ExpenseChartProps) {
       <h3 className="text-lg font-semibold text-white mb-6">Onde seu dinheiro foi parar</h3>
       
       <div className="h-[250px] w-full">
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width="100%" height={250}>
           <PieChart>
             <Pie
               data={data}
@@ -56,7 +56,7 @@ export function ExpenseChart({ transactions, categories }: ExpenseChartProps) {
               ))}
             </Pie>
             <Tooltip 
-              formatter={(value: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)}
+              formatter={(value: any) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(value))}
               contentStyle={{ backgroundColor: '#020617', border: '1px solid #1e293b', borderRadius: '12px' }}
               itemStyle={{ color: '#fff', fontWeight: 500 }}
               labelStyle={{ display: 'none' }}

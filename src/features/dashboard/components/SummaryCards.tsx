@@ -48,7 +48,7 @@ export function SummaryCards({ balance = 0, income = 0, expense = 0, isLoading =
             <div className="text-lg font-bold text-blue-100">
               {displayValue(income)}
             </div>
-            <p className="text-xs text-purple-300/70 mt-1">Receitas de sua Conta </p>
+            <p className="text-xs text-blue-100 mt-1">Receitas de sua Conta </p>
           </CardContent>
         </Card>
 
