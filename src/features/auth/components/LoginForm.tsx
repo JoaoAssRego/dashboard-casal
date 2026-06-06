@@ -79,7 +79,15 @@ export function LoginForm() {
       </div>
 
       {/* Card inferior sobreposto: superfície escura OLED do tema */}
-      <div className="animate-in fade-in slide-in-from-bottom-4 -mt-8 flex flex-1 flex-col rounded-t-3xl bg-card px-6 pb-[calc(env(safe-area-inset-bottom)+2rem)] pt-8 shadow-2xl shadow-black/50 duration-500">
+      <div
+        className="animate-in fade-in slide-in-from-bottom-4 relative z-10 -mt-10 flex flex-1 flex-col bg-card px-6 pb-[calc(env(safe-area-inset-bottom)+2rem)] pt-10 duration-500"
+        style={{
+          borderTopLeftRadius: "40px",
+          borderTopRightRadius: "40px",
+          // Sombra suave voltada para cima, reforçando o efeito de camada flutuante
+          boxShadow: "0 -8px 30px -6px rgba(0, 0, 0, 0.55)",
+        }}
+      >
         <div className="relative mx-auto w-full max-w-sm">
           {/* Overlay de transição ao alternar Login <-> Cadastro */}
           {isSwitching && (

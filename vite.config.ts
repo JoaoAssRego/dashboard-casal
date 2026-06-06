@@ -11,8 +11,8 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       manifest: {
-        name: 'Dashboard Financeiro',
-        short_name: 'Dashboard',
+        name: 'Yajo - Dashboard',
+        short_name: 'Yajo',
         theme_color: '#000000',
         background_color: '#000000',
         display: 'standalone',
