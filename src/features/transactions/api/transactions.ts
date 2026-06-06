@@ -6,6 +6,7 @@ export const transactionSchema = z.object({
   amount: z.coerce.number().positive('O valor deve ser maior que zero.'),
   description: z.string().min(3, 'A descrição deve ter pelo menos 3 caracteres.'),
   transaction_date: z.string().min(1, 'A data é obrigatória.'), 
+  goal_id: z.string().uuid('Meta inválida').optional().nullable(),
 })
 
 export type TransactionInput = z.infer<typeof transactionSchema>

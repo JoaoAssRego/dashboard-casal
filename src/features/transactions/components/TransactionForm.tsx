@@ -1,7 +1,8 @@
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query"
+import { getGoals } from "@/features/goals/api/goals"
 import { Loader2, Plus } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -45,8 +46,13 @@ export function TransactionForm() {
       amount: "" as any, // String vazia para o React entender que é controlado
       description: "",
       transaction_date: new Date().toISOString().split('T')[0],
+      goal_id: null,
     },
   })
+
+  // Assistir o tipo para mostrar o campo de meta
+  const txType = form.watch("type")
+  const { data: goals } = useQuery({ queryKey: ['goals'], queryFn: getGoals })
 
   const mutation = useMutation({
     mutationFn: createTransaction,
@@ -65,18 +71,25 @@ export function TransactionForm() {
     mutation.mutate(values)
   }
 
+  function handleOpen() {
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur()
+    }
+    setOpen(true)
+  }
+
   return (
-    <Drawer open={open} onOpenChange={setOpen}>
-      <DrawerTrigger asChild>
-        {/* Botão Flutuante (FAB) Estilo Nativo posicionado acima da BottomBar */}
-        <Button 
-          size="lg" 
-          className="fixed bottom-24 right-4 h-14 w-14 rounded-full shadow-xl shadow-primary/20 z-40 bg-purple-600 hover:bg-purple-500 border-none text-white"
-        >
-          <Plus className="h-6 w-6 stroke-[3px]" />
-        </Button>
-      </DrawerTrigger>
-      
+    <>
+      {/* Botão Flutuante (FAB) Estilo Nativo posicionado acima da BottomBar */}
+      <Button 
+        onClick={handleOpen}
+        size="lg" 
+        className="fixed bottom-24 right-4 h-14 w-14 rounded-full shadow-xl shadow-primary/20 z-40 bg-purple-600 hover:bg-purple-500 border-none text-white"
+      >
+        <Plus className="h-6 w-6 stroke-[3px]" />
+      </Button>
+
+      <Drawer open={open} onOpenChange={setOpen}>
       {/* O Conteúdo da Gaveta em Dark Premium */}
       <DrawerContent className="bg-slate-950 border-t border-purple-500/20">
         <div className="mx-auto w-full max-w-sm">
@@ -111,6 +124,33 @@ export function TransactionForm() {
                     </FormItem>
                   )}
                 />
+
+                {txType === 'investment' && goals && goals.length > 0 && (
+                  <FormField
+                    control={form.control}
+                    name="goal_id"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-slate-300">Para qual Meta?</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value || undefined}>
+                          <FormControl>
+                            <SelectTrigger className="bg-slate-900 border-slate-800 text-white">
+                              <SelectValue placeholder="Selecione a meta" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent className="bg-slate-900 border-slate-800">
+                            {goals.map((goal) => (
+                              <SelectItem key={goal.id} value={goal.id} className="text-indigo-300 font-medium">
+                                {goal.title}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
 
                 <div className="grid grid-cols-2 gap-4">
                   <FormField
@@ -175,6 +215,7 @@ export function TransactionForm() {
           </DrawerFooter>
         </div>
       </DrawerContent>
-    </Drawer>
+      </Drawer>
+    </>
   )
 }

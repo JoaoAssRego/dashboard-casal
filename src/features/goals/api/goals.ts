@@ -1,0 +1,64 @@
+import { supabase } from '@/lib/supabase'
+import { z } from 'zod'
+
+export const goalSchema = z.object({
+  title: z.string().min(3, 'O título deve ter pelo menos 3 caracteres.'),
+  target_amount: z.coerce.number().positive('O valor alvo deve ser maior que zero.'),
+})
+
+export type GoalInput = z.infer<typeof goalSchema>
+
+export interface FinancialGoal extends GoalInput {
+  id: string
+  household_id: string
+  status: 'active' | 'achieved' | 'paused'
+  created_at: string
+}
+
+async function getHouseholdId() {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error("Sessão expirada. Faça login novamente.")
+
+  const { data: profile } = await supabase
+    .from('user_profiles')
+    .select('household_id')
+    .eq('id', user.id)
+    .single()
+
+  return profile?.household_id
+}
+
+export async function createGoal(input: GoalInput) {
+  const household_id = await getHouseholdId()
+
+  const { data, error } = await supabase
+    .from('financial_goals')
+    .insert({
+      household_id,
+      ...input
+    })
+    .select()
+    .single()
+
+  if (error) throw new Error(error.message)
+  return data
+}
+
+export async function getGoals(): Promise<FinancialGoal[]> {
+  const { data, error } = await supabase
+    .from('financial_goals')
+    .select('*')
+    .order('created_at', { ascending: false })
+
+  if (error) throw new Error(error.message)
+  return data
+}
+
+export async function deleteGoal(id: string) {
+  const { error } = await supabase
+    .from('financial_goals')
+    .delete()
+    .eq('id', id)
+  
+  if (error) throw new Error(error.message)
+}
