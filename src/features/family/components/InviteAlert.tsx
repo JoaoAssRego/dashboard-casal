@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { getMyPendingInvites, acceptInvite, rejectInvite, type HouseholdInvite } from "@/features/family/api/family"
+import { getMyPendingInvites, acceptInvite, rejectInvite, familyKeys, type PendingInvite } from "@/features/family/api/family"
 import { useAuthStore } from "@/features/auth/store/useAuthStore"
 import { Loader2, MailOpen, X, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -10,10 +10,10 @@ export function InviteAlert() {
   const { user } = useAuthStore()
   const queryClient = useQueryClient()
   const [open, setOpen] = useState(false)
-  const [currentInvite, setCurrentInvite] = useState<HouseholdInvite | null>(null)
+  const [currentInvite, setCurrentInvite] = useState<PendingInvite | null>(null)
 
   const { data: invites } = useQuery({
-    queryKey: ['my_invites'],
+    queryKey: familyKeys.invites,
     queryFn: getMyPendingInvites,
     enabled: !!user,
     refetchInterval: 15000 // A cada 15 segundos ele busca convites novos!
@@ -41,7 +41,7 @@ export function InviteAlert() {
     onSuccess: () => {
       setOpen(false)
       setCurrentInvite(null)
-      queryClient.invalidateQueries({ queryKey: ['my_invites'] })
+      queryClient.invalidateQueries({ queryKey: familyKeys.invites })
     }
   })
 

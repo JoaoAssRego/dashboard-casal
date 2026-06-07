@@ -2,6 +2,12 @@ import { supabase } from '@/lib/supabase'
 import { z } from 'zod'
 import { getHouseholdId } from '@/features/household/api/household'
 
+// Fonte única das chaves de cache desta feature. Importe daqui em hooks/invalidações —
+// nunca escreva a string ['goals'] solta.
+export const goalKeys = {
+  all: ['goals'] as const,
+}
+
 export const goalSchema = z.object({
   title: z.string().min(3, 'O título deve ter pelo menos 3 caracteres.'),
   target_amount: z.coerce.number().positive('O valor alvo deve ser maior que zero.'),

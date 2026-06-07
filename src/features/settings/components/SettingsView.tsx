@@ -1,13 +1,13 @@
 import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
-import { getCategories, type Category } from "@/features/categories/api/categories"
+import { getCategories, categoryKeys, type Category } from "@/features/categories/api/categories"
 import { CategoryFormDrawer } from "./CategoryFormDrawer"
 import { FamilyDrawer } from "@/features/family/components/FamilyDrawer"
 import { Plus, Users } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 export function SettingsView() {
-  const { data: categories, isLoading } = useQuery({ queryKey: ['categories'], queryFn: getCategories })
+  const { data: categories, isLoading } = useQuery({ queryKey: categoryKeys.all, queryFn: getCategories })
   
   const [editingCat, setEditingCat] = useState<Category | null>(null)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)

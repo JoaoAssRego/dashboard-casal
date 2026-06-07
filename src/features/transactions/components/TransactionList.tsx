@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { getTransactions, deleteTransaction } from "../api/transactions"
+import { getTransactions, deleteTransaction, transactionKeys } from "../api/transactions"
 import { Loader2, Trash2 } from "lucide-react"
 import { TransactionEditDrawer } from "./TransactionEditDrawer"
 import type { Transaction } from "../api/transactions"
@@ -9,7 +9,7 @@ export function TransactionList() {
   const [editingTx, setEditingTx] = useState<Transaction | null>(null)
 
   const { data: transactions, isLoading, error } = useQuery({
-    queryKey: ['transactions'],
+    queryKey: transactionKeys.all,
     queryFn: getTransactions
   })
 
@@ -17,9 +17,9 @@ export function TransactionList() {
     mutationFn: deleteTransaction,
     onSuccess: () => {
       // Força a lista e os cartões do dashboard a se atualizarem na hora
-      queryClient.invalidateQueries({ queryKey: ['transactions'] })
+      queryClient.invalidateQueries({ queryKey: transactionKeys.all })
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       alert("Erro ao excluir: " + error.message)
     }
   })

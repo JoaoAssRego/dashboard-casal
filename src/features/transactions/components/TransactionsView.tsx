@@ -1,7 +1,7 @@
 import { useRef, useState } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { getTransactions, deleteTransaction } from "../api/transactions"
-import { getCategories } from "@/features/categories/api/categories"
+import { getTransactions, deleteTransaction, transactionKeys } from "../api/transactions"
+import { getCategories, categoryKeys } from "@/features/categories/api/categories"
 import { Loader2, Trash2, ArrowUpRight, ArrowDownRight, Target, UploadCloud } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -25,13 +25,13 @@ export function TransactionsView() {
     event.target.value = '' // reset
   }
 
-  const { data: transactions, isLoading: loadingTx } = useQuery({ queryKey: ['transactions'], queryFn: getTransactions })
-  const { data: categories } = useQuery({ queryKey: ['categories'], queryFn: getCategories })
+  const { data: transactions, isLoading: loadingTx } = useQuery({ queryKey: transactionKeys.all, queryFn: getTransactions })
+  const { data: categories } = useQuery({ queryKey: categoryKeys.all, queryFn: getCategories })
 
   const deleteMutation = useMutation({
     mutationFn: deleteTransaction,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['transactions'] })
+      queryClient.invalidateQueries({ queryKey: transactionKeys.all })
     }
   })
 

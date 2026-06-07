@@ -1,7 +1,7 @@
 import { useAuthStore } from "@/features/auth/store/useAuthStore"
 import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
-import { getTransactions } from "@/features/transactions/api/transactions"
+import { getTransactions, transactionKeys } from "@/features/transactions/api/transactions"
 import { User } from "lucide-react"
 import { SummaryCards } from "./SummaryCards"
 import { ProfileDrawer } from "./ProfileDrawer"
@@ -11,8 +11,8 @@ export function DashboardView() {
   
   // Busca e soma transações
   const { data: transactions, isLoading: loadingTx } = useQuery({ 
-    queryKey: ['transactions'], 
-    queryFn: getTransactions 
+    queryKey: transactionKeys.all,
+    queryFn: getTransactions
   })
 
   // Cálculos em tempo real para os cartões

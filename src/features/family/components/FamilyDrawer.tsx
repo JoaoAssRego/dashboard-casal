@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { getHouseholdMembers, getHouseholdPendingInvites, sendInvite } from "@/features/family/api/family"
+import { getHouseholdMembers, getHouseholdPendingInvites, sendInvite, familyKeys } from "@/features/family/api/family"
 import { Loader2, Users, Send, Mail, UserCheck, Clock } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -20,13 +20,13 @@ export function FamilyDrawer({ open, onOpenChange }: { open: boolean, onOpenChan
   const [errorMsg, setErrorMsg] = useState('')
 
   const { data: members, isLoading: loadingMembers } = useQuery({ 
-    queryKey: ['family_members'], 
+    queryKey: familyKeys.members,
     queryFn: getHouseholdMembers,
     enabled: open
   })
 
   const { data: pending } = useQuery({ 
-    queryKey: ['family_pending'], 
+    queryKey: familyKeys.pending,
     queryFn: getHouseholdPendingInvites,
     enabled: open
   })
@@ -36,7 +36,7 @@ export function FamilyDrawer({ open, onOpenChange }: { open: boolean, onOpenChan
     onSuccess: () => {
       setEmail('')
       setErrorMsg('')
-      queryClient.invalidateQueries({ queryKey: ['family_pending'] })
+      queryClient.invalidateQueries({ queryKey: familyKeys.pending })
     },
     onError: (error: Error) => {
       setErrorMsg(error.message)

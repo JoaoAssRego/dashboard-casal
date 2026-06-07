@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
-import { getTransactions } from "@/features/transactions/api/transactions"
-import { getCategories } from "@/features/categories/api/categories"
+import { getTransactions, transactionKeys } from "@/features/transactions/api/transactions"
+import { getCategories, categoryKeys } from "@/features/categories/api/categories"
 import { ChevronLeft } from "lucide-react"
 import { SummaryCards } from "./SummaryCards"
 import { ExpenseChart } from "./ExpenseChart"
@@ -8,8 +8,8 @@ import { useNavigate } from "react-router-dom"
 
 export function BalanceDetailsView() {
   const navigate = useNavigate()
-  const { data: transactions, isLoading: loadingTx } = useQuery({ queryKey: ['transactions'], queryFn: getTransactions })
-  const { data: categories } = useQuery({ queryKey: ['categories'], queryFn: getCategories })
+  const { data: transactions, isLoading: loadingTx } = useQuery({ queryKey: transactionKeys.all, queryFn: getTransactions })
+  const { data: categories } = useQuery({ queryKey: categoryKeys.all, queryFn: getCategories })
 
   const income = transactions?.filter(t => t.type === 'income').reduce((acc, t) => acc + Number(t.amount), 0) || 0
   const expense = transactions?.filter(t => t.type === 'expense').reduce((acc, t) => acc + Number(t.amount), 0) || 0

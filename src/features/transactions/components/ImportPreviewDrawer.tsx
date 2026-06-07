@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query"
-import { getCategories } from "@/features/categories/api/categories"
-import { createTransactionsBatch, type TransactionInput } from "../api/transactions"
+import { getCategories, categoryKeys } from "@/features/categories/api/categories"
+import { createTransactionsBatch, transactionKeys, type TransactionInput } from "../api/transactions"
 import { Loader2, ArrowRight } from "lucide-react"
 import Papa from "papaparse"
 
@@ -31,7 +31,7 @@ interface ImportPreviewDrawerProps {
 
 export function ImportPreviewDrawer({ csvFile, open, onOpenChange }: ImportPreviewDrawerProps) {
   const queryClient = useQueryClient()
-  const { data: categories } = useQuery({ queryKey: ['categories'], queryFn: getCategories })
+  const { data: categories } = useQuery({ queryKey: categoryKeys.all, queryFn: getCategories })
   
   const [parsedRows, setParsedRows] = useState<TransactionInput[]>([])
   const [isParsing, setIsParsing] = useState(false)
@@ -39,11 +39,11 @@ export function ImportPreviewDrawer({ csvFile, open, onOpenChange }: ImportPrevi
   const mutation = useMutation({
     mutationFn: createTransactionsBatch,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['transactions'] })
+      queryClient.invalidateQueries({ queryKey: transactionKeys.all })
       onOpenChange(false)
       setParsedRows([])
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       alert("Erro ao importar: " + error.message)
     }
   })

@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { getGoals, deleteGoal } from "../api/goals"
-import { getTransactions } from "@/features/transactions/api/transactions"
+import { getGoals, deleteGoal, goalKeys } from "../api/goals"
+import { getTransactions, transactionKeys } from "@/features/transactions/api/transactions"
 import { GoalForm } from "./GoalForm"
 import { GoalDetailsDrawer } from "./GoalDetailsDrawer"
 import { Loader2, Trash2 } from "lucide-react"
@@ -13,12 +13,12 @@ export function GoalsView() {
   const queryClient = useQueryClient()
   const [selectedGoal, setSelectedGoal] = useState<FinancialGoal | null>(null)
 
-  const { data: goals, isLoading: loadingGoals } = useQuery({ queryKey: ['goals'], queryFn: getGoals })
-  const { data: transactions, isLoading: loadingTx } = useQuery({ queryKey: ['transactions'], queryFn: getTransactions })
+  const { data: goals, isLoading: loadingGoals } = useQuery({ queryKey: goalKeys.all, queryFn: getGoals })
+  const { data: transactions, isLoading: loadingTx } = useQuery({ queryKey: transactionKeys.all, queryFn: getTransactions })
 
   const deleteMutation = useMutation({
     mutationFn: deleteGoal,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['goals'] })
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: goalKeys.all })
   })
 
   const isLoading = loadingGoals || loadingTx

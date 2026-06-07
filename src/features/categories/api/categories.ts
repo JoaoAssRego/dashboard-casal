@@ -1,11 +1,20 @@
 import { supabase } from '@/lib/supabase'
+import { z } from 'zod'
 import { getHouseholdId } from '@/features/household/api/household'
 
-export interface CategoryInput {
-  name: string
-  color: string
-  icon: string
+// Fonte única das chaves de cache desta feature. Importe daqui em hooks/invalidações —
+// nunca escreva a string ['categories'] solta.
+export const categoryKeys = {
+  all: ['categories'] as const,
 }
+
+export const categorySchema = z.object({
+  name: z.string().min(2, 'Nome deve ter no mínimo 2 caracteres.'),
+  color: z.string().min(4, 'Cor é obrigatória.'),
+  icon: z.string(),
+})
+
+export type CategoryInput = z.infer<typeof categorySchema>
 
 export interface Category extends CategoryInput {
   id: string

@@ -2,6 +2,14 @@ import { supabase } from '@/lib/supabase'
 import { z } from 'zod'
 import { getHouseholdId } from '@/features/household/api/household'
 
+// Fonte única das chaves de cache desta feature. Importe daqui em hooks/invalidações —
+// nunca escreva as strings ['family_members'] / ['family_pending'] / ['my_invites'] soltas.
+export const familyKeys = {
+  members: ['family_members'] as const,
+  pending: ['family_pending'] as const,
+  invites: ['my_invites'] as const,
+}
+
 // Schema co-localizado (padrão de transactions.ts): valida o e-mail do convite
 // antes de qualquer mutation, no client.
 export const inviteSchema = z.object({
@@ -27,6 +35,12 @@ export interface UserProfile {
   avatar_url: string | null
   created_at: string
 }
+
+// Subconjuntos colunares: as queries abaixo selecionam só o necessário (não SELECT *),
+// então o tipo de retorno reflete exatamente as colunas buscadas — não a linha inteira.
+export type PendingInvite = Pick<HouseholdInvite, 'id' | 'inviter_email' | 'status' | 'created_at'>
+export type HouseholdMember = Pick<UserProfile, 'id' | 'display_name'>
+export type SentInvite = Pick<HouseholdInvite, 'id' | 'invitee_email' | 'status' | 'created_at'>
 
 export async function sendInvite(rawEmail: string) {
   // Valida via Zod antes de tocar o banco (normaliza trim/lowercase).
@@ -64,19 +78,25 @@ export async function sendInvite(rawEmail: string) {
 }
 
 // Para quem está logado e precisa ver se alguém o convidou
-export async function getMyPendingInvites(): Promise<HouseholdInvite[]> {
+export async function getMyPendingInvites(): Promise<PendingInvite[]> {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user?.email) return []
+
   const { data, error } = await supabase
     .from('household_invites')
     .select('id, inviter_email, status, created_at')
     .eq('status', 'pending')
+    .eq('invitee_email', user.email)
 
-  // A segurança RLS garante que o Supabase só retorne onde invitee_email = email_logado
+  // Defesa em profundidade: o RLS de household_invites é permissivo por OR (destinatário
+  // OU membro do household), então sem este filtro a query também traria convites que o
+  // PRÓPRIO household enviou. Filtramos por invitee_email para devolver só os recebidos.
   if (error) throw new Error(error.message)
   return data || []
 }
 
 // Para o líder da Conta Conjunta ver quem faz parte dela
-export async function getHouseholdMembers(): Promise<UserProfile[]> {
+export async function getHouseholdMembers(): Promise<HouseholdMember[]> {
   const household_id = await getHouseholdId()
   const { data, error } = await supabase
     .from('user_profiles')
@@ -88,7 +108,7 @@ export async function getHouseholdMembers(): Promise<UserProfile[]> {
 }
 
 // Para o líder da Conta Conjunta ver convites enviados que ainda não foram aceitos
-export async function getHouseholdPendingInvites(): Promise<HouseholdInvite[]> {
+export async function getHouseholdPendingInvites(): Promise<SentInvite[]> {
   const household_id = await getHouseholdId()
   const { data, error } = await supabase
     .from('household_invites')

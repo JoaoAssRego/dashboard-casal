@@ -1,9 +1,10 @@
 import { useEffect } from "react"
 import { useForm } from "react-hook-form"
+import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query"
-import { getGoals } from "@/features/goals/api/goals"
-import { getCategories } from "@/features/categories/api/categories"
+import { getGoals, goalKeys } from "@/features/goals/api/goals"
+import { getCategories, categoryKeys } from "@/features/categories/api/categories"
 import { Loader2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -33,7 +34,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
-import { transactionSchema, type TransactionInput, type Transaction, updateTransaction } from "../api/transactions"
+import { transactionSchema, transactionKeys, type TransactionInput, type Transaction, updateTransaction } from "../api/transactions"
 
 interface TransactionEditDrawerProps {
   transaction: Transaction | null
@@ -44,11 +45,12 @@ interface TransactionEditDrawerProps {
 export function TransactionEditDrawer({ transaction, open, onOpenChange }: TransactionEditDrawerProps) {
   const queryClient = useQueryClient()
 
-  const form = useForm<TransactionInput>({
-    resolver: zodResolver(transactionSchema) as any,
+  // 3 genéricos: entrada (campo cru, amount como string) → contexto → saída coagida (TransactionInput).
+  const form = useForm<z.input<typeof transactionSchema>, unknown, TransactionInput>({
+    resolver: zodResolver(transactionSchema),
     defaultValues: {
       type: "expense",
-      amount: "" as any,
+      amount: "",
       description: "",
       transaction_date: new Date().toISOString().split('T')[0],
       goal_id: null,
@@ -61,7 +63,7 @@ export function TransactionEditDrawer({ transaction, open, onOpenChange }: Trans
     if (transaction) {
       form.reset({
         type: transaction.type,
-        amount: Number(transaction.amount) as any,
+        amount: Number(transaction.amount),
         description: transaction.description,
         transaction_date: new Date(transaction.transaction_date).toISOString().split('T')[0],
         goal_id: transaction.goal_id,
@@ -71,17 +73,17 @@ export function TransactionEditDrawer({ transaction, open, onOpenChange }: Trans
   }, [transaction, form])
 
   const txType = form.watch("type")
-  const { data: goals } = useQuery({ queryKey: ['goals'], queryFn: getGoals })
-  const { data: categories } = useQuery({ queryKey: ['categories'], queryFn: getCategories })
+  const { data: goals } = useQuery({ queryKey: goalKeys.all, queryFn: getGoals })
+  const { data: categories } = useQuery({ queryKey: categoryKeys.all, queryFn: getCategories })
 
   const mutation = useMutation({
     mutationFn: updateTransaction,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['transactions'] })
-      queryClient.invalidateQueries({ queryKey: ['goals'] }) // Pode afetar metas se for investimento
+      queryClient.invalidateQueries({ queryKey: transactionKeys.all })
+      queryClient.invalidateQueries({ queryKey: goalKeys.all }) // Pode afetar metas se for investimento
       onOpenChange(false)
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       alert("Erro ao editar: " + error.message)
     }
   })
@@ -199,7 +201,7 @@ export function TransactionEditDrawer({ transaction, open, onOpenChange }: Trans
                       <FormItem>
                         <FormLabel className="text-slate-300">Valor (R$)</FormLabel>
                         <FormControl>
-                          <Input type="number" step="0.01" placeholder="0.00" className="bg-slate-900 border-slate-800 text-white" {...field} />
+                          <Input type="number" step="0.01" placeholder="0.00" className="bg-slate-900 border-slate-800 text-white" {...field} value={field.value as string | number} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

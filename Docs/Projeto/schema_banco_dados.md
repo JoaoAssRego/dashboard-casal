@@ -55,3 +55,26 @@ O coração da motivação do usuário.
 - `current_amount` (Numeric/Decimal)
 - `status` (Text/Enum: `active`, `achieved`, `paused`)
 - `created_at` (Timestamp)
+
+---
+
+## 4. Segurança: Funções e Políticas (RLS / RPC)
+
+*(Seção parcial — documenta as funções `SECURITY DEFINER` e as políticas mais sensíveis. As migrations em `supabase/migrations/` são a fonte da verdade.)*
+
+### Funções `SECURITY DEFINER`
+Todas com `SET search_path = ''`, corpo qualificado com `public.`, identidade derivada de `auth.uid()`/`auth.jwt()` (nunca de parâmetro), e `EXECUTE` concedido só a `authenticated` (revogado de `anon`/`public`).
+
+- **`create_household_for_user(household_name TEXT) RETURNS UUID`** (phase10) — cria o household sob demanda no primeiro acesso e vincula ao perfil. Anti-sequestro: falha se o usuário já pertence a um household. O `household_name` é cosmético; a posse vem de `auth.uid()`.
+- **`accept_household_invite(invite_id UUID)`** (phase10) — valida que `invitee_email = auth.jwt()->>'email'` e move o perfil para o household do convite. Única via de entrada em outro household.
+- **`handle_new_user()`** (trigger em `auth.users`, phase10) — cria a linha em `user_profiles` no cadastro.
+- **`current_household_id() RETURNS UUID`** (phase11) — retorna o `household_id` do usuário atual *bypassando* o RLS de `user_profiles`. Existe para ser usada DENTRO de políticas da própria `user_profiles` sem causar recursão infinita de RLS.
+
+### Políticas de `user_profiles`
+- **SELECT** — duas políticas permissivas (combinadas por OR):
+  1. `id = auth.uid()` (próprio perfil; setup inicial).
+  2. `household_id = public.current_household_id()` (phase11) — permite ao casal ver os perfis do **mesmo** household. É o que faz `getHouseholdMembers()` funcionar (antes só retornava o próprio usuário).
+- **UPDATE** (phase10) — `USING (id = auth.uid())` + `WITH CHECK` que **congela** o `household_id` (o usuário não troca o próprio household direto na tabela; só via `accept_household_invite`).
+
+### Demais tabelas operacionais (`transactions`, `financial_goals`, `categories`, `household_invites`)
+RLS ancorado em pertencimento ao household: `household_id IN (SELECT household_id FROM public.user_profiles WHERE id = auth.uid())`, com `WITH CHECK` espelhando o `USING` em INSERT/UPDATE (phase10) para impedir mover linha para outro household. `household_invites` tem ainda uma política de destinatário (`invitee_email = auth.jwt()->>'email'`).

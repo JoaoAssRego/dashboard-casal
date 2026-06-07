@@ -1,9 +1,10 @@
 import { useState } from "react"
 import { useForm } from "react-hook-form"
+import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query"
-import { getGoals } from "@/features/goals/api/goals"
-import { getCategories } from "@/features/categories/api/categories"
+import { getGoals, goalKeys } from "@/features/goals/api/goals"
+import { getCategories, categoryKeys } from "@/features/categories/api/categories"
 import { Loader2, Plus } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -33,17 +34,18 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
-import { transactionSchema, type TransactionInput, createTransaction } from "../api/transactions"
+import { transactionSchema, transactionKeys, type TransactionInput, createTransaction } from "../api/transactions"
 
 export function TransactionForm() {
   const [open, setOpen] = useState(false)
   const queryClient = useQueryClient()
 
-  const form = useForm<TransactionInput>({
-    resolver: zodResolver(transactionSchema) as any,
+  // 3 genéricos: entrada (campo cru, amount como string) → contexto → saída coagida (TransactionInput).
+  const form = useForm<z.input<typeof transactionSchema>, unknown, TransactionInput>({
+    resolver: zodResolver(transactionSchema),
     defaultValues: {
       type: "expense",
-      amount: "" as any, // String vazia para o React entender que é controlado
+      amount: "", // String vazia para o React entender que é controlado
       description: "",
       transaction_date: new Date().toISOString().split('T')[0],
       goal_id: null,
@@ -53,18 +55,18 @@ export function TransactionForm() {
 
   // Assistir o tipo para mostrar o campo de meta
   const txType = form.watch("type")
-  const { data: goals } = useQuery({ queryKey: ['goals'], queryFn: getGoals })
-  const { data: categories } = useQuery({ queryKey: ['categories'], queryFn: getCategories })
+  const { data: goals } = useQuery({ queryKey: goalKeys.all, queryFn: getGoals })
+  const { data: categories } = useQuery({ queryKey: categoryKeys.all, queryFn: getCategories })
 
   const mutation = useMutation({
     mutationFn: createTransaction,
     onSuccess: () => {
       // Invalida o cache e faz a Home se re-desenhar na mesma hora
-      queryClient.invalidateQueries({ queryKey: ['transactions'] })
+      queryClient.invalidateQueries({ queryKey: transactionKeys.all })
       setOpen(false)
       form.reset()
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       alert("Erro ao salvar: " + error.message)
     }
   })
@@ -193,7 +195,7 @@ export function TransactionForm() {
                       <FormItem>
                         <FormLabel className="text-slate-300">Valor (R$)</FormLabel>
                         <FormControl>
-                          <Input type="number" step="0.01" placeholder="0.00" className="bg-slate-900 border-slate-800 text-white" {...field} />
+                          <Input type="number" step="0.01" placeholder="0.00" className="bg-slate-900 border-slate-800 text-white" {...field} value={field.value as string | number} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

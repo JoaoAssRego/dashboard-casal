@@ -1,9 +1,8 @@
 import { useEffect } from "react"
 import { useForm } from "react-hook-form"
-import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { createCategory, updateCategory, type Category, type CategoryInput } from "@/features/categories/api/categories"
+import { createCategory, updateCategory, categorySchema, categoryKeys, type Category, type CategoryInput } from "@/features/categories/api/categories"
 import { Loader2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -16,12 +15,6 @@ import {
   DrawerTitle,
 } from "@/components/ui/drawer"
 import { cn } from "@/lib/utils"
-
-const categorySchema = z.object({
-  name: z.string().min(2, 'Nome deve ter no mínimo 2 caracteres.'),
-  color: z.string().min(4, 'Cor é obrigatória.'),
-  icon: z.string()
-})
 
 const COLORS = [
   '#ef4444', '#f97316', '#eab308', '#22c55e', '#14b8a6', 
@@ -38,7 +31,7 @@ export function CategoryFormDrawer({ category, open, onOpenChange }: CategoryFor
   const queryClient = useQueryClient()
   
   const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm<CategoryInput>({
-    resolver: zodResolver(categorySchema) as any,
+    resolver: zodResolver(categorySchema),
     defaultValues: {
       name: '',
       color: COLORS[0],
@@ -68,7 +61,7 @@ export function CategoryFormDrawer({ category, open, onOpenChange }: CategoryFor
       return createCategory(data)
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['categories'] })
+      queryClient.invalidateQueries({ queryKey: categoryKeys.all })
       onOpenChange(false)
     }
   })

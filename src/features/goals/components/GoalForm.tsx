@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { useForm } from "react-hook-form"
+import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { Loader2, Target } from "lucide-react"
@@ -24,28 +25,29 @@ import {
   DrawerTitle,
 } from "@/components/ui/drawer"
 
-import { goalSchema, type GoalInput, createGoal } from "../api/goals"
+import { goalSchema, goalKeys, type GoalInput, createGoal } from "../api/goals"
 
 export function GoalForm() {
   const [open, setOpen] = useState(false)
   const queryClient = useQueryClient()
 
-  const form = useForm<GoalInput>({
-    resolver: zodResolver(goalSchema) as any,
+  // 3 genéricos: entrada (campo cru, target_amount como string) → contexto → saída coagida (GoalInput).
+  const form = useForm<z.input<typeof goalSchema>, unknown, GoalInput>({
+    resolver: zodResolver(goalSchema),
     defaultValues: {
       title: "",
-      target_amount: "" as any,
+      target_amount: "",
     },
   })
 
   const mutation = useMutation({
     mutationFn: createGoal,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['goals'] })
+      queryClient.invalidateQueries({ queryKey: goalKeys.all })
       setOpen(false)
       form.reset()
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       alert("Erro ao salvar meta: " + error.message)
     }
   })
@@ -101,7 +103,7 @@ export function GoalForm() {
                     <FormItem>
                       <FormLabel className="text-slate-300">Qual o valor alvo? (R$)</FormLabel>
                       <FormControl>
-                        <Input type="number" step="0.01" placeholder="Ex: 5000.00" className="bg-slate-900 border-slate-800 text-white" {...field} />
+                        <Input type="number" step="0.01" placeholder="Ex: 5000.00" className="bg-slate-900 border-slate-800 text-white" {...field} value={field.value as string | number} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
