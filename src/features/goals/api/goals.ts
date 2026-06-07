@@ -22,8 +22,8 @@ export async function createGoal(input: GoalInput) {
   const { data, error } = await supabase
     .from('financial_goals')
     .insert({
+      ...input,
       household_id,
-      ...input
     })
     .select()
     .single()

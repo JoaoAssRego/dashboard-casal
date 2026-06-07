@@ -33,9 +33,9 @@ export async function createTransaction(input: TransactionInput) {
   const { data, error } = await supabase
     .from('transactions')
     .insert({
+      ...input,
       household_id,
       created_by: user?.id,
-      ...input
     })
     .select()
     .single()
@@ -81,9 +81,9 @@ export async function createTransactionsBatch(transactions: TransactionInput[]) 
   const { data: { user } } = await supabase.auth.getUser()
 
   const insertData = transactions.map(t => ({
+    ...t,
     household_id,
     created_by: user?.id,
-    ...t
   }))
 
   const { data, error } = await supabase

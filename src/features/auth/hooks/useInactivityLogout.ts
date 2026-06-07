@@ -5,6 +5,10 @@ import { useAuthStore } from "@/features/auth/store/useAuthStore"
 const INACTIVITY_LIMIT_MS = 20 * 60 * 1000 // 20 minutos
 const STORAGE_KEY = "last_activity_at"
 
+// Sinaliza para a tela de login por que a sessão foi encerrada. Lido (e limpo) pelo LoginForm.
+export const LOGOUT_REASON_KEY = "logout_reason"
+export const LOGOUT_REASON_INACTIVITY = "inactivity"
+
 // Eventos que contam como "usuário ativo".
 const ACTIVITY_EVENTS = ["mousedown", "keydown", "touchstart", "scroll", "click"] as const
 
@@ -29,6 +33,7 @@ export function useInactivityLogout() {
 
     function logout() {
       localStorage.removeItem(STORAGE_KEY)
+      localStorage.setItem(LOGOUT_REASON_KEY, LOGOUT_REASON_INACTIVITY)
       signOut()
     }
 

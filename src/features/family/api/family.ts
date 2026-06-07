@@ -1,5 +1,14 @@
 import { supabase } from '@/lib/supabase'
+import { z } from 'zod'
 import { getHouseholdId } from '@/features/household/api/household'
+
+// Schema co-localizado (padrão de transactions.ts): valida o e-mail do convite
+// antes de qualquer mutation, no client.
+export const inviteSchema = z.object({
+  invitee_email: z.string().trim().toLowerCase().email('Informe um e-mail válido.'),
+})
+
+export type InviteInput = z.infer<typeof inviteSchema>
 
 export interface HouseholdInvite {
   id: string
@@ -19,7 +28,9 @@ export interface UserProfile {
   created_at: string
 }
 
-export async function sendInvite(invitee_email: string) {
+export async function sendInvite(rawEmail: string) {
+  // Valida via Zod antes de tocar o banco (normaliza trim/lowercase).
+  const { invitee_email } = inviteSchema.parse({ invitee_email: rawEmail })
   const household_id = await getHouseholdId()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error("Usuário não logado.")
@@ -56,9 +67,9 @@ export async function sendInvite(invitee_email: string) {
 export async function getMyPendingInvites(): Promise<HouseholdInvite[]> {
   const { data, error } = await supabase
     .from('household_invites')
-    .select('*')
+    .select('id, inviter_email, status, created_at')
     .eq('status', 'pending')
-  
+
   // A segurança RLS garante que o Supabase só retorne onde invitee_email = email_logado
   if (error) throw new Error(error.message)
   return data || []
@@ -69,7 +80,7 @@ export async function getHouseholdMembers(): Promise<UserProfile[]> {
   const household_id = await getHouseholdId()
   const { data, error } = await supabase
     .from('user_profiles')
-    .select('*')
+    .select('id, display_name')
     .eq('household_id', household_id)
   
   if (error) throw new Error(error.message)
@@ -81,7 +92,7 @@ export async function getHouseholdPendingInvites(): Promise<HouseholdInvite[]> {
   const household_id = await getHouseholdId()
   const { data, error } = await supabase
     .from('household_invites')
-    .select('*')
+    .select('id, invitee_email, status, created_at')
     .eq('household_id', household_id)
     .eq('status', 'pending')
 

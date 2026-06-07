@@ -1,7 +1,8 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Loader2 } from "lucide-react"
+import { Loader2, Clock } from "lucide-react"
+import { LOGOUT_REASON_KEY, LOGOUT_REASON_INACTIVITY } from "../hooks/useInactivityLogout"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -21,6 +22,15 @@ export function LoginForm() {
   const [isSignUp, setIsSignUp] = useState(false)
   const [isSwitching, setIsSwitching] = useState(false)
   const [serverError, setServerError] = useState("")
+  // Lê (no primeiro render) se a sessão anterior caiu por inatividade.
+  const [inactivityNotice] = useState(
+    () => localStorage.getItem(LOGOUT_REASON_KEY) === LOGOUT_REASON_INACTIVITY
+  )
+
+  // Limpa o sinal para o aviso não reaparecer num próximo login.
+  useEffect(() => {
+    if (inactivityNotice) localStorage.removeItem(LOGOUT_REASON_KEY)
+  }, [inactivityNotice])
 
   function toggleMode() {
     // Pequena transição para o usuário perceber a mudança de Login <-> Cadastro
@@ -113,6 +123,16 @@ export function LoginForm() {
                 : "Entre para começar a sua jornada financeira"}
             </p>
           </div>
+
+          {inactivityNotice && !isSignUp && (
+            <div className="animate-in fade-in slide-in-from-top-2 mb-4 flex items-start gap-3 rounded-2xl border border-primary/30 bg-primary/10 p-4 text-sm text-foreground duration-500">
+              <Clock className="mt-0.5 size-5 shrink-0 text-primary" />
+              <div>
+                <p className="font-medium">Sessão encerrada por inatividade</p>
+                <p className="mt-0.5 text-muted-foreground">Por segurança, entre novamente para continuar.</p>
+              </div>
+            </div>
+          )}
 
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">

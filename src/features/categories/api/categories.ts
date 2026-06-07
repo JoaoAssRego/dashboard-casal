@@ -27,7 +27,7 @@ export async function createCategory(input: CategoryInput): Promise<Category> {
   const household_id = await getHouseholdId()
   const { data, error } = await supabase
     .from('categories')
-    .insert({ household_id, ...input })
+    .insert({ ...input, household_id })
     .select()
     .single()
 
