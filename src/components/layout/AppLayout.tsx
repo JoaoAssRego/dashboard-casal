@@ -1,10 +1,14 @@
 import { Outlet, Link, useLocation } from "react-router-dom"
 import { Home, Target, ArrowRightLeft, Menu } from "lucide-react"
 import { InviteAlert } from "@/features/family/components/InviteAlert"
+import { useInactivityLogout } from "@/features/auth/hooks/useInactivityLogout"
 import { cn } from "@/lib/utils"
 
 export function AppLayout() {
   const location = useLocation()
+
+  // Encerra a sessão automaticamente após período ocioso (segurança em app financeiro).
+  useInactivityLogout()
 
   const navItems = [
     { icon: Home, label: "Início", path: "/" },

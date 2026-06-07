@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase'
 import { z } from 'zod'
+import { getHouseholdId } from '@/features/household/api/household'
 
 export const goalSchema = z.object({
   title: z.string().min(3, 'O título deve ter pelo menos 3 caracteres.'),
@@ -13,19 +14,6 @@ export interface FinancialGoal extends GoalInput {
   household_id: string
   status: 'active' | 'achieved' | 'paused'
   created_at: string
-}
-
-async function getHouseholdId() {
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error("Sessão expirada. Faça login novamente.")
-
-  const { data: profile } = await supabase
-    .from('user_profiles')
-    .select('household_id')
-    .eq('id', user.id)
-    .single()
-
-  return profile?.household_id
 }
 
 export async function createGoal(input: GoalInput) {

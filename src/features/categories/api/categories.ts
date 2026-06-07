@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase'
-import { getHouseholdId } from '@/features/transactions/api/transactions'
+import { getHouseholdId } from '@/features/household/api/household'
 
 export interface CategoryInput {
   name: string
