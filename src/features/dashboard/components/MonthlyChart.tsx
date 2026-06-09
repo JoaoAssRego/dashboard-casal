@@ -53,7 +53,7 @@ export function MonthlyChart({ transactions }: MonthlyChartProps) {
             />
             <YAxis hide />
             <Tooltip
-              formatter={(value: number) => fmt(value)}
+              formatter={(value: unknown) => fmt(Number(value))}
               contentStyle={{ backgroundColor: TOOLTIP_BG, border: `1px solid ${TOOLTIP_BORDER}`, borderRadius: '12px' }}
               itemStyle={{ color: 'oklch(0.985 0 0)', fontWeight: 500 }}
               labelStyle={{ color: AXIS_COLOR, marginBottom: 4 }}
