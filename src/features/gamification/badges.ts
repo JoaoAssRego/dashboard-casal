@@ -10,6 +10,37 @@ export interface Badge {
   unlocked: boolean
 }
 
+export function computeStreak(transactions: Transaction[]): number {
+  const now = new Date()
+  let streak = 0
+  let offset = 0
+  while (true) {
+    const d = new Date(now.getFullYear(), now.getMonth() - offset, 1)
+    const prefix = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+    const txs = transactions.filter(t => t.transaction_date.startsWith(prefix))
+    if (txs.length === 0) break
+    const inc = txs.filter(t => t.type === 'income').reduce((s, t) => s + Number(t.amount), 0)
+    const exp = txs.filter(t => t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0)
+    if (inc > 0 && inc > exp) { streak++; offset++ } else break
+  }
+  return streak
+}
+
+export function computeNextHint(transactions: Transaction[], goals: FinancialGoal[]): string | null {
+  const investments = transactions.filter(t => t.type === 'investment')
+  if (investments.length > 0 && investments.length < 3) {
+    const remaining = 3 - investments.length
+    return `Falta ${remaining} aporte${remaining > 1 ? 's' : ''} para Poupador`
+  }
+  if (investments.length === 0 && transactions.length > 0) {
+    return 'Registre o primeiro investimento para Investidor Iniciante'
+  }
+  if (goals.length === 0 && transactions.length > 0) {
+    return 'Crie uma meta financeira para Caçador de Metas'
+  }
+  return null
+}
+
 export function computeBadges(
   transactions: Transaction[],
   goals: FinancialGoal[]

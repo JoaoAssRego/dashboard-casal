@@ -1,6 +1,13 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 import type { Transaction } from '@/features/transactions/api/transactions'
 
+// Design system tokens (DESIGN.md)
+const INCOME_COLOR = 'oklch(0.707 0.154 238)'   // income-sky
+const EXPENSE_COLOR = 'oklch(0.720 0.179 338)'  // expense-blush
+const TOOLTIP_BG = 'oklch(0.07 0.01 267)'       // near-black, brand-tinted
+const TOOLTIP_BORDER = 'oklch(0.22 0.01 267)'   // surface border
+const AXIS_COLOR = 'oklch(0.60 0.01 253)'        // foreground-secondary
+
 interface MonthlyChartProps {
   transactions: Transaction[]
 }
@@ -25,35 +32,43 @@ export function MonthlyChart({ transactions }: MonthlyChartProps) {
 
   if (!data.some(d => d.Receitas > 0 || d.Despesas > 0)) return null
 
+  const srSummary = data
+    .filter(d => d.Receitas > 0 || d.Despesas > 0)
+    .map(d => `${d.mes}: receita ${fmt(d.Receitas)}, despesa ${fmt(d.Despesas)}`)
+    .join('. ')
+
   return (
     <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-5 shadow-lg">
       <h3 className="text-base font-semibold text-white mb-5">Últimos 6 Meses</h3>
-      <ResponsiveContainer width="100%" height={200}>
-        <BarChart data={data} barCategoryGap="30%" barGap={3}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
-          <XAxis
-            dataKey="mes"
-            tick={{ fill: '#94a3b8', fontSize: 11 }}
-            axisLine={false}
-            tickLine={false}
-          />
-          <YAxis hide />
-          <Tooltip
-            formatter={(value: number) => fmt(value)}
-            contentStyle={{ backgroundColor: '#020617', border: '1px solid #1e293b', borderRadius: '12px' }}
-            itemStyle={{ color: '#fff', fontWeight: 500 }}
-            labelStyle={{ color: '#94a3b8', marginBottom: 4 }}
-          />
-          <Legend
-            verticalAlign="bottom"
-            height={32}
-            iconType="circle"
-            wrapperStyle={{ fontSize: '11px', paddingTop: '12px' }}
-          />
-          <Bar dataKey="Receitas" fill="#60a5fa" radius={[4, 4, 0, 0]} maxBarSize={28} />
-          <Bar dataKey="Despesas" fill="#f472b6" radius={[4, 4, 0, 0]} maxBarSize={28} />
-        </BarChart>
-      </ResponsiveContainer>
+      <div role="img" aria-label="Gráfico de barras: receitas e despesas dos últimos 6 meses">
+        <p className="sr-only">Receitas e despesas dos últimos 6 meses. {srSummary}</p>
+        <ResponsiveContainer width="100%" height={200}>
+          <BarChart data={data} barCategoryGap="30%" barGap={3}>
+            <CartesianGrid strokeDasharray="3 3" stroke={TOOLTIP_BORDER} vertical={false} />
+            <XAxis
+              dataKey="mes"
+              tick={{ fill: AXIS_COLOR, fontSize: 11 }}
+              axisLine={false}
+              tickLine={false}
+            />
+            <YAxis hide />
+            <Tooltip
+              formatter={(value: number) => fmt(value)}
+              contentStyle={{ backgroundColor: TOOLTIP_BG, border: `1px solid ${TOOLTIP_BORDER}`, borderRadius: '12px' }}
+              itemStyle={{ color: 'oklch(0.985 0 0)', fontWeight: 500 }}
+              labelStyle={{ color: AXIS_COLOR, marginBottom: 4 }}
+            />
+            <Legend
+              verticalAlign="bottom"
+              height={32}
+              iconType="circle"
+              wrapperStyle={{ fontSize: '11px', paddingTop: '12px' }}
+            />
+            <Bar dataKey="Receitas" fill={INCOME_COLOR} radius={[4, 4, 0, 0]} maxBarSize={28} />
+            <Bar dataKey="Despesas" fill={EXPENSE_COLOR} radius={[4, 4, 0, 0]} maxBarSize={28} />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
     </div>
   )
 }
