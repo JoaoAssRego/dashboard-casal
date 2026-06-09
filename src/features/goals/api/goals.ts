@@ -53,6 +53,18 @@ export async function deleteGoal(id: string) {
     .from('financial_goals')
     .delete()
     .eq('id', id)
-  
+
   if (error) throw new Error(error.message)
+}
+
+export async function updateGoalStatus(id: string, status: FinancialGoal['status']) {
+  const { data, error } = await supabase
+    .from('financial_goals')
+    .update({ status })
+    .eq('id', id)
+    .select()
+    .single()
+
+  if (error) throw new Error(error.message)
+  return data as FinancialGoal
 }
